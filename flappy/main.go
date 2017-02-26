@@ -18,6 +18,7 @@ func main() {
 	scene := &game.Scene{}
 	gameOverScene := &game.GameOverScene{}
 
+	engo.RegisterScene(scene)
 	engo.RegisterScene(gameOverScene)
 
 	engo.Run(opts, scene)

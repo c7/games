@@ -40,7 +40,7 @@ func (*Scene) Setup(world *ecs.World) {
 	world.AddSystem(&common.CollisionSystem{})
 	world.AddSystem(&FallingSystem{})
 	world.AddSystem(&PipeSpawnSystem{})
-	world.AddSystem(&EnemySystem{})
+	world.AddSystem(&PipeSystem{})
 
 	texture, err := common.LoadedSprite("bird.png")
 	if err != nil {

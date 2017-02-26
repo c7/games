@@ -71,8 +71,57 @@ func NewPipe(world *ecs.World, position engo.Point, spriteName string) {
 			sys.Add(&pipe.BasicEntity, &pipe.RenderComponent, &pipe.SpaceComponent)
 		case *common.CollisionSystem:
 			sys.Add(&pipe.BasicEntity, &pipe.CollisionComponent, &pipe.SpaceComponent)
-		case *EnemySystem:
+		case *PipeSystem:
 			sys.Add(&pipe.BasicEntity, &pipe.SpaceComponent)
+		}
+	}
+}
+
+var score int
+
+type pipeEntity struct {
+	*ecs.BasicEntity
+	*common.SpaceComponent
+}
+
+type PipeSystem struct {
+	entities []pipeEntity
+}
+
+func (es *PipeSystem) Add(basic *ecs.BasicEntity, space *common.SpaceComponent) {
+	es.entities = append(es.entities, pipeEntity{basic, space})
+}
+
+func (s *PipeSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range s.entities {
+		if e.BasicEntity.ID() == basic.ID() {
+			delete = index
+			break
+		}
+	}
+	if delete >= 0 {
+		s.entities = append(s.entities[:delete], s.entities[delete+1:]...)
+	}
+}
+
+func (s *PipeSystem) Update(dt float32) {
+	engo.Mailbox.Listen("CollisionMessage", func(message engo.Message) {
+		_, isCollision := message.(common.CollisionMessage)
+
+		if isCollision {
+			engo.SetSceneByName("GameOver", false)
+		}
+	})
+
+	speed := 360 * dt
+
+	for _, e := range s.entities {
+		e.SpaceComponent.Position.X -= speed
+
+		if int(e.SpaceComponent.Position.X) == 0 {
+			score++
+			fmt.Println("Score:", score)
 		}
 	}
 }
